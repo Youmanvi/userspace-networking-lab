@@ -12,6 +12,7 @@
 #include "packets.hpp"
 #include "socket.hpp"
 #include "tcb.hpp"
+#include "tcb_aol.hpp"
 #include "tcp_transmit.hpp"
 #include "socket_manager.hpp"
 
@@ -220,7 +221,8 @@ public:
         }
 
         // Track connection added to backlog (called when connection goes ESTABLISHED)
-        void track_backlog_queued(ipv4_port_t port) {
+        void track_backlog_queued(ipv4_port_t port, const std::string& remote_addr,
+                                 uint16_t remote_port) {
                 auto it = listeners.find(port);
                 if (it != listeners.end()) {
                         it->second->backlog_stats.current++;
@@ -233,16 +235,44 @@ public:
                         DLOG(INFO) << "[BACKLOG QUEUED] Port " << port.port_addr.value()
                                    << " current=" << it->second->backlog_stats.current
                                    << " max=" << it->second->backlog_stats.max;
+
+                        // Log to append-only log
+                        auto& aol = tcb_aol::instance();
+                        aol.log_backlog_queued(port.port_addr.value(), remote_addr, remote_port,
+                                             it->second->backlog_stats.current,
+                                             it->second->backlog_stats.max);
                 }
         }
 
         // Track connection removed from backlog (called when application accepts)
-        void track_backlog_dequeued(ipv4_port_t port) {
+        void track_backlog_dequeued(ipv4_port_t port, const std::string& remote_addr,
+                                   uint16_t remote_port) {
                 auto it = listeners.find(port);
                 if (it != listeners.end() && it->second->backlog_stats.current > 0) {
                         it->second->backlog_stats.current--;
                         DLOG(INFO) << "[BACKLOG DEQUEUED] Port " << port.port_addr.value()
                                    << " current=" << it->second->backlog_stats.current;
+
+                        // Log to append-only log
+                        auto& aol = tcb_aol::instance();
+                        aol.log_backlog_dequeued(port.port_addr.value(), remote_addr, remote_port,
+                                                it->second->backlog_stats.current);
+                }
+        }
+
+        // Track connection rejected due to backlog full (called when backlog capacity exceeded)
+        void track_backlog_rejected(ipv4_port_t port, const std::string& remote_addr,
+                                   uint16_t remote_port) {
+                auto it = listeners.find(port);
+                if (it != listeners.end()) {
+                        it->second->backlog_stats.total_rejected++;
+                        DLOG(WARNING) << "[BACKLOG REJECTED] Port " << port.port_addr.value()
+                                      << " total_rejected=" << it->second->backlog_stats.total_rejected;
+
+                        // Log to append-only log
+                        auto& aol = tcb_aol::instance();
+                        aol.log_backlog_rejected(port.port_addr.value(), remote_addr, remote_port,
+                                                it->second->backlog_stats.total_rejected);
                 }
         }
 
@@ -327,6 +357,12 @@ public:
                                       << " Max: " << max_connections
                                       << " Remote: " << two_end.remote_info.value();
                         port_stats[port].total_rejected++;
+
+                        // Log to append-only log
+                        auto& aol = tcb_aol::instance();
+                        aol.log_connection_rejected(port, two_end.remote_info.value().ipv4_addr.to_string(),
+                                                   two_end.remote_info.value().port_addr.value(),
+                                                   "global_limit_exceeded");
                         return false;  // Limit exceeded - caller will send RST
                 }
 
@@ -337,6 +373,12 @@ public:
                                       << " Max: " << port_max
                                       << " Remote: " << two_end.remote_info.value();
                         port_stats[port].total_rejected++;
+
+                        // Log to append-only log
+                        auto& aol = tcb_aol::instance();
+                        aol.log_connection_rejected(port, two_end.remote_info.value().ipv4_addr.to_string(),
+                                                   two_end.remote_info.value().port_addr.value(),
+                                                   "port_limit_exceeded");
                         return false;  // Limit exceeded - caller will send RST
                 }
 
