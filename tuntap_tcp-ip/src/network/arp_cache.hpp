@@ -1,6 +1,5 @@
 #pragma once
 #include <unordered_map>
-
 #include "ipv4_addr.hpp"
 #include "logger.hpp"
 #include "mac_addr.hpp"
