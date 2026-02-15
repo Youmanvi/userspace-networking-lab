@@ -1,0 +1,45 @@
+
+#pragma once
+#include <memory>
+#include <optional>
+#include <queue>
+
+namespace uStack {
+
+namespace docs {
+static const char* circle_buffer_doc = R"(
+FILE: circle_buffer.hpp
+PURPOSE: FIFO queue wrapper. Methods: push_back(), pop_front(), empty(), size().
+)";
+}
+
+    template <typename PacketType>
+    class circle_buffer {
+    private:
+            std::queue<PacketType> packets;
+
+    public:
+            bool
+            empty() {
+                    return packets.size() == 0;
+            }
+            void
+            push_back(PacketType packet) {
+                    packets.push(std::move(packet));
+            }
+            
+            int 
+            size(){
+                    return packets.size();
+            }
+            std::optional<PacketType>
+            pop_front() {
+                    if (empty()) {
+                            return std::nullopt;
+                    }
+                    auto packet = std::move(packets.front());
+                    packets.pop();
+                    return std::move(packet);
+            }
+    };
+};  // namespace uStack
