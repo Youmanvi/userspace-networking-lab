@@ -386,6 +386,13 @@ public:
                            << " (Global: " << (tcbs.size() + 1) << "/" << max_connections << ")"
                            << " (Port " << port << ": " << (port_current + 1) << "/" << port_max << ")";
 
+                // Log to append-only log
+                auto& aol = tcb_aol::instance();
+                aol.log_tcb_registered(two_end.remote_info.value().ipv4_addr.to_string(),
+                                      two_end.remote_info.value().port_addr.value(),
+                                      two_end.local_info.value().ipv4_addr.to_string(),
+                                      two_end.local_info.value().port_addr.value());
+
                 std::shared_ptr<tcb_t> tcb = std::make_shared<tcb_t>(this->active_tcbs, listener,
                                                                      two_end.remote_info.value(),
                                                                      two_end.local_info.value());
