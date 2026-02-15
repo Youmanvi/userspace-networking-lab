@@ -91,7 +91,9 @@ public:
 
                                 // NEW: Track backlog dequeue when connection is accepted
                                 auto& mgr = tcb_manager::instance();
-                                mgr.track_backlog_dequeued(listener->local_info.value());
+                                mgr.track_backlog_dequeued(listener->local_info.value(),
+                                                          tcb.value()->remote_info.value().ipv4_addr.to_string(),
+                                                          tcb.value()->remote_info.value().port_addr.value());
 
                                 // Clear acceptable if queue now empty
                                 if (listener->acceptors->empty()) {
