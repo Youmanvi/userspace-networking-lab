@@ -624,7 +624,14 @@ public:
                                                                 // Backlog is full - reject connection
                                                                 DLOG(WARNING) << "[BACKLOG FULL] Rejecting connection"
                                                                               << " local=" << local_port.port_addr.value()
-                                                                              << " remote=" << in_tcp.seq_no;
+                                                                              << " remote=" << in_packet.remote_info.value();
+
+                                                                // Track backlog rejection in AOL
+                                                                auto& aol = tcb_aol::instance();
+                                                                mgr.track_backlog_rejected(local_port,
+                                                                        in_packet.remote_info.value().ipv4_addr.to_string(),
+                                                                        in_packet.remote_info.value().port_addr.value());
+
                                                                 tcp_send_rst(in_tcb, in_tcp, 0);
                                                                 return;
                                                         }
@@ -632,7 +639,9 @@ public:
                                                         // Backlog has space - queue to acceptors
                                                         in_tcb->listen_finish();
                                                         // Track connection in backlog
-                                                        mgr.track_backlog_queued(local_port);
+                                                        mgr.track_backlog_queued(local_port,
+                                                                in_packet.remote_info.value().ipv4_addr.to_string(),
+                                                                in_packet.remote_info.value().port_addr.value());
                                                 } else {
                                                         // No listener - shouldn't happen for passive open
                                                         DLOG(WARNING) << "[ESTABLISH] No listener for TCB";
