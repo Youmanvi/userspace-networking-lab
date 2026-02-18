@@ -1,2 +1,5 @@
 Modified mTCP Stack for Virtual Network Functions over DPDK
-This directory contains the implementation of modified mTCP. At a high level, we modify mTCP to integrate with our in-house DPDK based API, which is capable of performing incoming packet distribution in software. Due to this, mTCP is capable of running independently of underlying NIC capabilities.
+This directory contains the implementation of modified mTCP. At a high level, we modify mTCP to integrate with our in-house DPDK based API, which is capable of performing incoming packet distribution in software. Due to this, mTCP is capable of running independently of underlying NIC capabilities. 
+
+In Progress: Single Core Implementation
+To Do: Multi Core Implementation
