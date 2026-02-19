@@ -518,6 +518,7 @@ wait:
 	return cnt;
 }
 /*----------------------------------------------------------------------------*/
+// This function is called when a stream is established or has pending events when registering to epoll.
 int
 AddEpollEvent(struct mtcp_epoll *ep, 
 		int queue_type, socket_map_t socket, uint32_t event)
