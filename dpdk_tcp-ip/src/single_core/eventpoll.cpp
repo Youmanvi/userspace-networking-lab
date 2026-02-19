@@ -312,6 +312,7 @@ mtcp_epoll_ctl(mctx_t mctx, int epid,
 	return 0;
 }
 /*----------------------------------------------------------------------------*/
+// This function is called when a stream is established or has pending events when registering to epoll.
 int 
 mtcp_epoll_wait(mctx_t mctx, int epid, 
 		struct mtcp_epoll_event *events, int maxevents, int timeout)
