@@ -727,4 +727,4 @@ io_module_func dpdk_module_func = {
 	.dev_ioctl		   = NULL
 };
 /*----------------------------------------------------------------------------*/
-#endif /* !DISABLE_DPDK */
+#endif /* !DISABLE_DPDK */  
